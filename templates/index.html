@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Derivadas Numéricas - Calculadora Robusta</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .nav-tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            background: #f8f9fa;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tab.active {
+            background: #3498db;
+            color: white;
+        }
+        
+        .nav-tab:hover {
+            background: #e9ecef;
+        }
+        
+        .nav-tab.active:hover {
+            background: #2980b9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .results {
+            background: #fff;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 25px;
+            min-height: 100px;
+        }
+        
+        .result-title {
+            color: #2c3e50;
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        .result-value {
+            background: #e8f6f3;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .steps {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .steps h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .step {
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+        }
+        
+        .step:last-child {
+            border-bottom: none;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .interpolation-points {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .point-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        
+        .point-input input {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .add-point, .remove-point {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .add-point {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .remove-point {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .method-description {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .method-description h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+        
+        .method-description p {
+            color: #424242;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧮 Derivadas Numéricas</h1>
+            <p>Calculadora robusta para métodos de diferencias finitas, interpolación y extrapolación de Richardson</p>
+        </div>
+        
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('diferencias')">Diferencias Finitas</button>
+            <button class="nav-tab" onclick="showTab('richardson')">Richardson</button>
+            <button class="nav-tab" onclick="showTab('interpolacion')">Interpolación</button>
+            <button class="nav-tab" onclick="showTab('derivada-interpolacion')">Derivada por Interpolación</button>
+        </div>
+        
+        <div class="content">
+            <!-- TAB: DIFERENCIAS FINITAS -->
+            <div id="diferencias" class="tab-content active">
+                <div class="method-description">
+                    <h3>Diferencias Finitas</h3>
+                    <p>Calcula derivadas numéricas usando aproximaciones por diferencias finitas. Incluye métodos hacia adelante, hacia atrás y centrada, con comparación automática con la derivada exacta.</p>
+                </div>
+                
+                <div class="form-section">
+                    <form id="diferenciasForm">
+                        <div class="form-group">
+                            <label for="df_funcion">Función f(x):</label>
+                            <input type="text" id="df_funcion" class="form-control" placeholder="Ej: x**2 + 2*x + 1, sin(x), exp(x)" value="x**2">
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="df_x">Punto x:</label>
+                                <input type="number" id="df_x" class="form-control" step="any" value="2">
+                            </div>
+                            <div class="form-group">
+                                <label for="df_h">Paso h:</label>
+                                <input type="number" id="df_h" class="form-control" step="any" value="0.00001">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="df_metodo">Método:</label>
+                                <select id="df_metodo" class="form-control">
+                                    <option value="centrada">Diferencia Centrada</option>
+                                    <option value="adelante">Diferencia Hacia Adelante</option>
+                                    <option value="atras">Diferencia Hacia Atrás</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="df_orden">Orden de la derivada:</label>
+                                <select id="df_orden" class="form-control">
+                                    <option value="1">Primera derivada</option>
+                                    <option value="2">Segunda derivada</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn">Calcular Diferencias Finitas</button>
+                    </form>
+                </div>
+                
+                <div id="diferenciasResults" class="results" style="display: none;"></div>
+            </div>
+            
+            <!-- TAB: RICHARDSON -->
+            <div id="richardson" class="tab-content">
+                <div class="method-description">
+                    <h3>Extrapolación de Richardson</h3>
+                    <p>Mejora la precisión de las derivadas numéricas usando extrapolación de Richardson. Este método reduce el error de truncamiento de manera sistemática.</p>
+                </div>
+                
+                <div class="form-section">
+                    <form id="richardsonForm">
+                        <div class="form-group">
+                            <label for="r_funcion">Función f(x):</label>
+                            <input type="text" id="r_funcion" class="form-control" placeholder="Ej: x**3 + 2*x**2 - x + 1" value="x**3">
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="r_x">Punto x:</label>
+                                <input type="number" id="r_x" class="form-control" step="any" value="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="r_h">Paso inicial h:</label>
+                                <input type="number" id="r_h" class="form-control" step="any" value="0.01">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="r_metodo">Método base:</label>
+                                <select id="r_metodo" class="form-control">
+                                    <option value="centrada">Diferencia Centrada</option>
+                                    <option value="adelante">Diferencia Hacia Adelante</option>
+                                    <option value="atras">Diferencia Hacia Atrás</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="r_orden">Orden:</label>
+                                <select id="r_orden" class="form-control">
+                                    <option value="1">Primera derivada</option>
+                                    <option value="2">Segunda derivada</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="r_niveles">Niveles de extrapolación:</label>
+                            <select id="r_niveles" class="form-control">
+                                <option value="3">3 niveles</option>
+                                <option value="4">4 niveles</option>
+                                <option value="5">5 niveles</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn">Aplicar Richardson</button>
+                    </form>
+                </div>
+                
+                <div id="richardsonResults" class="results" style="display: none;"></div>
+            </div>
+            
+            <!-- TAB: INTERPOLACIÓN -->
+            <div id="interpolacion" class="tab-content">
+                <div class="method-description">
+                    <h3>Interpolación Polinómica</h3>
+                    <p>Encuentra el polinomio que pasa por un conjunto de puntos usando los métodos de Lagrange o Newton. Útil para aproximar funciones conocidas solo en puntos discretos.</p>
+                </div>
+                
+                <div class="form-section">
+                    <form id="interpolacionForm">
+                        <div class="form-group">
+                            <label for="i_metodo">Método de interpolación:</label>
+                            <select id="i_metodo" class="form-control">
+                                <option value="lagrange">Lagrange</option>
+                                <option value="newton">Newton</option>
+                            </select>
+                        </div>
+                        
+                        <div class="interpolation-points">
+                            <h4>Puntos (x, y):</h4>
+                            <div id="pointsContainer">
+                                <div class="point-input">
+                                    <input type="number" step="any" placeholder="x₁" class="x-point" value="0">
+                                    <input type="number" step="any" placeholder="y₁" class="y-point" value="1">
+                                    <button type="button" class="remove-point" onclick="removePoint(this)">-</button>
+                                </div>
+                                <div class="point-input">
+                                    <input type="number" step="any" placeholder="x₂" class="x-point" value="1">
+                                    <input type="number" step="any" placeholder="y₂" class="y-point" value="2">
+                                    <button type="button" class="remove-point" onclick="removePoint(this)">-</button>
+                                </div>
+                                <div class="point-input">
+                                    <input type="number" step="any" placeholder="x₃" class="x-point" value="2">
+                                    <input type="number" step="any" placeholder="y₃" class="y-point" value="5">
+                                    <button type="button" class="remove-point" onclick="removePoint(this)">-</button>
+                                </div>
+                            </div>
+                            <button type="button" class="add-point" onclick="addPoint()">+ Agregar Punto</button>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="i_x_eval">Evaluar en x:</label>
+                            <input type="number" id="i_x_eval" class="form-control" step="any" value="1.5">
+                        </div>
+                        
+                        <button type="submit" class="btn">Calcular Interpolación</button>
+                    </form>
+                </div>
+                
+                <div id="interpolacionResults" class="results" style="display: none;"></div>
+            </div>
+            
+            <!-- TAB: DERIVADA POR INTERPOLACIÓN -->
+            <div id="derivada-interpolacion" class="tab-content">
+                <div class="method-description">
+                    <h3>Derivada por Interpolación</h3>
+                    <p>Calcula derivadas numéricas construyendo un polinomio interpolador en puntos cercanos al punto de interés, luego deriva analíticamente el polinomio.</p>
+                </div>
+                
+                <div class="form-section">
+                    <form id="derivadaInterpolacionForm">
+                        <div class="form-group">
+                            <label for="di_funcion">Función f(x):</label>
+                            <input type="text" id="di_funcion" class="form-control" placeholder="Ej: sin(x), cos(x), x**3 + x" value="sin(x)">
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="di_x">Punto x:</label>
+                                <input type="number" id="di_x" class="form-control" step="any" value="1.5708">
+                            </div>
+                            <div class="form-group">
+                                <label for="di_h">Espaciado h:</label>
+                                <input type="number" id="di_h" class="form-control" step="any" value="0.001">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="di_metodo">Método:</label>
+                                <select id="di_metodo" class="form-control">
+                                    <option value="lagrange">Lagrange</option>
+                                    <option value="newton">Newton</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="di_orden">Orden de derivada:</label>
+                                <select id="di_orden" class="form-control">
+                                    <option value="1">Primera derivada</option>
+                                    <option value="2">Segunda derivada</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="di_puntos">Número de puntos:</label>
+                            <select id="di_puntos" class="form-control">
+                                <option value="5">5 puntos</option>
+                                <option value="7">7 puntos</option>
+                                <option value="9">9 puntos</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn">Calcular Derivada por Interpolación</button>
+                    </form>
+                </div>
+                
+                <div id="derivadaInterpolacionResults" class="results" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Función para cambiar pestañas
+        function showTab(tabName) {
+            // Ocultar todas las pestañas
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Remover active de botones
+            const buttons = document.querySelectorAll('.nav-tab');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            // Mostrar pestaña seleccionada
+            document.getElementById(tabName).classList.add('active');
+            
+            // Activar botón correspondiente
+            event.target.classList.add('active');
+        }
+        
+        // Gestión de puntos para interpolación
+        function addPoint() {
+            const container = document.getElementById('pointsContainer');
+            const pointNum = container.children.length + 1;
+            const div = document.createElement('div');
+            div.className = 'point-input';
+            div.innerHTML = `
+                <input type="number" step="any" placeholder="x${pointNum}" class="x-point">
+                <input type="number" step="any" placeholder="y${pointNum}" class="y-point">
+                <button type="button" class="remove-point" onclick="removePoint(this)">-</button>
+            `;
+            container.appendChild(div);
+        }
+        
+        function removePoint(button) {
+            const container = document.getElementById('pointsContainer');
+            if (container.children.length > 2) {
+                button.parentElement.remove();
+            }
+        }
+        
+        // Función para mostrar loading
+        function showLoading(containerId) {
+            const container = document.getElementById(containerId);
+            container.style.display = 'block';
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Calculando...</p>
+                </div>
+            `;
+        }
+        
+        // Función para mostrar resultados
+        function showResults(containerId, data) {
+            const container = document.getElementById(containerId);
+            
+            if (data.success) {
+                let html = `
+                    <div class="result-title">Resultado</div>
+                    <div class="result-value">${data.resultado}</div>
+                `;
+                
+                if (data.pasos && data.pasos.length > 0) {
+                    html += `
+                        <div class="steps">
+                            <h4>Pasos del cálculo:</h4>
+                    `;
+                    
+                    data.pasos.forEach(paso => {
+                        html += `<div class="step">${paso}</div>`;
+                    });
+                    
+                    html += `</div>`;
+                }
+                
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = `
+                    <div class="error">
+                        <strong>Error:</strong> ${data.error}
+                    </div>
+                `;
+            }
+        }
+        
+        // Eventos de formularios
+        document.getElementById('diferenciasForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                funcion: document.getElementById('df_funcion').value,
+                x: document.getElementById('df_x').value,
+                h: document.getElementById('df_h').value,
+                metodo: document.getElementById('df_metodo').value,
+                orden: document.getElementById('df_orden').value
+            };
+            
+            showLoading('diferenciasResults');
+            
+            try {
+                const response = await fetch('/diferencias_finitas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                showResults('diferenciasResults', result);
+            } catch (error) {
+                showResults('diferenciasResults', {
+                    success: false,
+                    error: 'Error de conexión: ' + error.message
+                });
+            }
+        });
+        
+        document.getElementById('richardsonForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                funcion: document.getElementById('r_funcion').value,
+                x: document.getElementById('r_x').value,
+                h: document.getElementById('r_h').value,
+                metodo: document.getElementById('r_metodo').value,
+                orden: document.getElementById('r_orden').value,
+                niveles: document.getElementById('r_niveles').value
+            };
+            
+            showLoading('richardsonResults');
+            
+            try {
+                const response = await fetch('/richardson', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                showResults('richardsonResults', result);
+            } catch (error) {
+                showResults('richardsonResults', {
+                    success: false,
+                    error: 'Error de conexión: ' + error.message
+                });
+            }
+        });
+        
+        document.getElementById('interpolacionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const xPoints = Array.from(document.querySelectorAll('.x-point')).map(input => input.value);
+            const yPoints = Array.from(document.querySelectorAll('.y-point')).map(input => input.value);
+            
+            const data = {
+                metodo: document.getElementById('i_metodo').value,
+                x_puntos: xPoints,
+                y_puntos: yPoints,
+                x_eval: document.getElementById('i_x_eval').value
+            };
+            
+            showLoading('interpolacionResults');
+            
+            try {
+                const response = await fetch('/interpolacion', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                showResults('interpolacionResults', result);
+            } catch (error) {
+                showResults('interpolacionResults', {
+                    success: false,
+                    error: 'Error de conexión: ' + error.message
+                });
+            }
+        });
+        
+        document.getElementById('derivadaInterpolacionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                funcion: document.getElementById('di_funcion').value,
+                x: document.getElementById('di_x').value,
+                h: document.getElementById('di_h').value,
+                metodo: document.getElementById('di_metodo').value,
+                orden: document.getElementById('di_orden').value,
+                num_puntos: document.getElementById('di_puntos').value
+            };
+            
+            showLoading('derivadaInterpolacionResults');
+            
+            try {
+                const response = await fetch('/derivada_interpolacion', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                showResults('derivadaInterpolacionResults', result);
+            } catch (error) {
+                showResults('derivadaInterpolacionResults', {
+                    success: false,
+                    error: 'Error de conexión: ' + error.message
+                });
+            }
+        });
+    </script>
+</body>
+</html>
