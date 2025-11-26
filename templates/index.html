@@ -522,7 +522,6 @@
             <button class="nav-tab active" onclick="showTab('diferencias')">Diferencias Finitas</button>
             <button class="nav-tab" onclick="showTab('richardson')">Richardson</button>
             <button class="nav-tab" onclick="showTab('interpolacion')">Interpolación</button>
-            <button class="nav-tab" onclick="showTab('derivada-interpolacion')">Derivada por Interpolación</button>
         </div>
         
         <div class="content">
@@ -704,8 +703,8 @@
                         <div class="form-group">
                             <label for="r_funcion">Función f(x):</label>
                             <div class="math-input-container">
-                                <div id="r_math-preview" class="math-preview">x³</div>
-                                <input type="text" id="r_funcion" class="form-control" placeholder="Ej: x**3 + 2*x**2 - x + 1" value="x**3" oninput="updateMathPreview('r_funcion', 'r_math-preview')">
+                                <div id="r_math-preview" class="math-preview">ln(x)</div>
+                                <input type="text" id="r_funcion" class="form-control" placeholder="Ej: x**3 + 2*x**2 - x + 1" value="log(x)" oninput="updateMathPreview('r_funcion', 'r_math-preview')">
                             </div>
                             <div id="virtual-keyboard-richardson" class="keyboard-container">
                                 <!-- Sección: Básicos -->
@@ -825,11 +824,11 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="r_x">Punto x:</label>
-                                <input type="number" id="r_x" class="form-control" step="any" value="1">
+                                <input type="number" id="r_x" class="form-control" step="any" value="1.8">
                             </div>
                             <div class="form-group">
                                 <label for="r_h">Paso inicial h:</label>
-                                <input type="number" id="r_h" class="form-control" step="any" value="0.01">
+                                <input type="number" id="r_h" class="form-control" step="any" value="0.1">
                             </div>
                         </div>
                         
@@ -838,14 +837,14 @@
                                 <label for="r_metodo">Método base:</label>
                                 <select id="r_metodo" class="form-control">
                                     <option value="centrada">Diferencia Centrada</option>
-                                    <option value="adelante">Diferencia Hacia Adelante</option>
+                                    <option value="adelante" selected>Diferencia Hacia Adelante</option>
                                     <option value="atras">Diferencia Hacia Atrás</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="r_orden">Orden:</label>
                                 <select id="r_orden" class="form-control">
-                                    <option value="1">Primera derivada</option>
+                                    <option value="1" selected>Primera derivada</option>
                                     <option value="2">Segunda derivada</option>
                                 </select>
                             </div>
@@ -854,7 +853,8 @@
                         <div class="form-group">
                             <label for="r_niveles">Niveles de extrapolación:</label>
                             <select id="r_niveles" class="form-control">
-                                <option value="3">3 niveles</option>
+                                <option value="2">2 niveles</option>
+                                <option value="3" selected>3 niveles</option>
                                 <option value="4">4 niveles</option>
                                 <option value="5">5 niveles</option>
                             </select>
@@ -918,179 +918,7 @@
                 <div id="interpolacionResults" class="results" style="display: none;"></div>
             </div>
             
-            <!-- TAB: DERIVADA POR INTERPOLACIÓN -->
-            <div id="derivada-interpolacion" class="tab-content">
-                <div class="method-description">
-                    <h3>Derivada por Interpolación</h3>
-                    <p>Calcula derivadas de funciones continuas usando interpolación polinómica. El algoritmo genera automáticamente puntos alrededor del punto de interés, construye un polinomio interpolador usando Lagrange o Newton, y luego deriva analíticamente ese polinomio. Generalmente más preciso que diferencias finitas simples.</p>
-                </div>
-                
-                <div class="form-section">
-                    <form id="derivadaInterpolacionForm">
-                        <div class="form-group">
-                            <label for="di_funcion">Función f(x):</label>
-                            <div class="math-input-container">
-                                <div id="di_math-preview" class="math-preview">sin(x)</div>
-                                <input type="text" id="di_funcion" class="form-control" placeholder="Ej: sin(x), cos(x), x**3 + x" value="sin(x)" oninput="updateMathPreview('di_funcion', 'di_math-preview')">
-                            </div>
-                            <div id="virtual-keyboard-derivada" class="keyboard-container">
-                                <!-- Sección: Básicos -->
-                                <div class="keyboard-section">
-                                    <div class="keyboard-section-header" onclick="toggleSection(this)">
-                                        <span class="keyboard-section-title">Básicos</span>
-                                        <span class="keyboard-section-toggle">▼</span>
-                                    </div>
-                                    <div class="keyboard-section-content">
-                                        <div class="keyboard-row">
-                                            <button type="button" class="key-btn number" onclick="insertSymbolTo('di_funcion', '7')">7</button>
-                                            <button type="button" class="key-btn number" onclick="insertSymbolTo('di_funcion', '8')">8</button>
-                                            <button type="button" class="key-btn number" onclick="insertSymbolTo('di_funcion', '9')">9</button>
-                                            <button type="button" class="key-btn operator" onclick="insertSymbolTo('di_funcion', '/')">÷</button>
-                                            <button type="button" class="key-btn operator" onclick="insertSymbolTo('di_funcion', '**')">^</button>
-                                            <button type="button" class="key-btn" onclick="insertSymbolTo('di_funcion', '(')">(</button>
-                                            <button type="button" class="key-btn" onclick="insertSymbolTo('di_funcion', ')')">)</button>
-                                            <button type="button" class="key-btn special" onclick="clearInputFor('di_funcion')">C</button>
-                                            <button type="button" class="key-btn special" onclick="deleteCharFrom('di_funcion')">⌫</button>
-                                            <button type="button" class="key-btn" onclick="insertSymbolTo('di_funcion', ' ')">␣</button>
-                                        </div>
-                                        <div class="keyboard-row">
-                                            <button type="button" class="key-btn number" onclick="insertSymbolTo('di_funcion', '4')">4</button>
-                                            <button type="button" class="key-btn number" onclick="insertSymbolTo('di_funcion', '5')">5</button>
-                                            <button type="button" class="key-btn number" onclick="insertSymbolTo('di_funcion', '6')">6</button>
-                                            <button type="button" class="key-btn operator" onclick="insertSymbolTo('di_funcion', '*')">×</button>
-                                            <button type="button" class="key-btn operator" onclick="insertSymbolTo('di_funcion', '**2')">x²</button>
-                                            <button type="button" class="key-btn operator" onclick="insertSymbolTo('di_funcion', '**3')">x³</button>
-                                            <button type="button" class="key-btn function" onclick="insertSymbolTo('di_funcion', 'sqrt(')">√</button>
-                                            <button type="button" class="key-btn function" onclick="insertSymbolTo('di_funcion', 'abs(')">|x|</button>
-                                            <button type="button" class="key-btn constant" onclick="insertSymbolTo('di_funcion', 'pi')">π</button>
-                                            <button type="button" class="key-btn constant" onclick="insertSymbolTo('di_funcion', 'E')">e</button>
-                                        </div>
-                                        <div class="keyboard-row">
-                                            <button type="button" class="key-btn number" onclick="insertSymbolTo('di_funcion', '1')">1</button>
-                                            <button type="button" class="key-btn number" onclick="insertSymbolTo('di_funcion', '2')">2</button>
-                                            <button type="button" class="key-btn number" onclick="insertSymbolTo('di_funcion', '3')">3</button>
-                                            <button type="button" class="key-btn operator" onclick="insertSymbolTo('di_funcion', '-')">-</button>
-                                            <button type="button" class="key-btn operator" onclick="insertSymbolTo('di_funcion', '**(')">xⁿ</button>
-                                            <button type="button" class="key-btn operator" onclick="insertSymbolTo('di_funcion', '**(1/')">ⁿ√</button>
-                                            <button type="button" class="key-btn function" onclick="insertSymbolTo('di_funcion', 'exp(')">e^x</button>
-                                            <button type="button" class="key-btn function" onclick="insertSymbolTo('di_funcion', 'log(')">ln</button>
-                                            <button type="button" class="key-btn function" onclick="insertSymbolTo('di_funcion', 'log10(')">log₁₀</button>
-                                            <button type="button" class="key-btn function" onclick="insertSymbolTo('di_funcion', 'factorial(')">n!</button>
-                                        </div>
-                                        <div class="keyboard-row">
-                                            <button type="button" class="key-btn number" onclick="insertSymbolTo('di_funcion', '0')">0</button>
-                                            <button type="button" class="key-btn number" onclick="insertSymbolTo('di_funcion', '00')">00</button>
-                                            <button type="button" class="key-btn number" onclick="insertSymbolTo('di_funcion', '.')">.</button>
-                                            <button type="button" class="key-btn operator" onclick="insertSymbolTo('di_funcion', '+')">+</button>
-                                            <button type="button" class="key-btn variable" onclick="insertSymbolTo('di_funcion', 'x')">x</button>
-                                            <button type="button" class="key-btn variable" onclick="insertSymbolTo('di_funcion', 'y')">y</button>
-                                            <button type="button" class="key-btn variable" onclick="insertSymbolTo('di_funcion', 'z')">z</button>
-                                            <button type="button" class="key-btn function" onclick="insertSymbolTo('di_funcion', 'floor(')">⌊x⌋</button>
-                                            <button type="button" class="key-btn function" onclick="insertSymbolTo('di_funcion', 'ceil(')">⌈x⌉</button>
-                                            <button type="button" class="key-btn function" onclick="insertSymbolTo('di_funcion', 'sign(')">sgn</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Sección: Trigonométricas -->
-                                <div class="keyboard-section">
-                                    <div class="keyboard-section-header" onclick="toggleSection(this)">
-                                        <span class="keyboard-section-title">Trigonométricas</span>
-                                        <span class="keyboard-section-toggle collapsed">▼</span>
-                                    </div>
-                                    <div class="keyboard-section-content collapsed">
-                                        <div class="keyboard-row">
-                                            <button type="button" class="key-btn function" onclick="insertSymbolTo('di_funcion', 'sin(')">sin</button>
-                                            <button type="button" class="key-btn function" onclick="insertSymbolTo('di_funcion', 'cos(')">cos</button>
-                                            <button type="button" class="key-btn function" onclick="insertSymbolTo('di_funcion', 'tan(')">tan</button>
-                                            <button type="button" class="key-btn function" onclick="insertSymbolTo('di_funcion', 'sec(')">sec</button>
-                                            <button type="button" class="key-btn function" onclick="insertSymbolTo('di_funcion', 'csc(')">csc</button>
-                                            <button type="button" class="key-btn function" onclick="insertSymbolTo('di_funcion', 'cot(')">cot</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Sección: Trig. Inversas -->
-                                <div class="keyboard-section">
-                                    <div class="keyboard-section-header" onclick="toggleSection(this)">
-                                        <span class="keyboard-section-title">Trig. Inversas</span>
-                                        <span class="keyboard-section-toggle collapsed">▼</span>
-                                    </div>
-                                    <div class="keyboard-section-content collapsed">
-                                        <div class="keyboard-row">
-                                            <button type="button" class="key-btn function" onclick="insertSymbolTo('di_funcion', 'asin(')">arcsin</button>
-                                            <button type="button" class="key-btn function" onclick="insertSymbolTo('di_funcion', 'acos(')">arccos</button>
-                                            <button type="button" class="key-btn function" onclick="insertSymbolTo('di_funcion', 'atan(')">arctan</button>
-                                            <button type="button" class="key-btn function" onclick="insertSymbolTo('di_funcion', 'asec(')">arcsec</button>
-                                            <button type="button" class="key-btn function" onclick="insertSymbolTo('di_funcion', 'acsc(')">arccsc</button>
-                                            <button type="button" class="key-btn function" onclick="insertSymbolTo('di_funcion', 'acot(')">arccot</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Sección: Hiperbólicas -->
-                                <div class="keyboard-section">
-                                    <div class="keyboard-section-header" onclick="toggleSection(this)">
-                                        <span class="keyboard-section-title">Hiperbólicas</span>
-                                        <span class="keyboard-section-toggle collapsed">▼</span>
-                                    </div>
-                                    <div class="keyboard-section-content collapsed">
-                                        <div class="keyboard-row">
-                                            <button type="button" class="key-btn function" onclick="insertSymbolTo('di_funcion', 'sinh(')">sinh</button>
-                                            <button type="button" class="key-btn function" onclick="insertSymbolTo('di_funcion', 'cosh(')">cosh</button>
-                                            <button type="button" class="key-btn function" onclick="insertSymbolTo('di_funcion', 'tanh(')">tanh</button>
-                                            <button type="button" class="key-btn function" onclick="insertSymbolTo('di_funcion', 'asinh(')">arcsinh</button>
-                                            <button type="button" class="key-btn function" onclick="insertSymbolTo('di_funcion', 'acosh(')">arccosh</button>
-                                            <button type="button" class="key-btn function" onclick="insertSymbolTo('di_funcion', 'atanh(')">arctanh</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="di_x">Punto x:</label>
-                                <input type="number" id="di_x" class="form-control" step="any" value="1.5708">
-                            </div>
-                            <div class="form-group">
-                                <label for="di_h">Espaciado h:</label>
-                                <input type="number" id="di_h" class="form-control" step="any" value="0.001">
-                            </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="di_metodo">Método:</label>
-                                <select id="di_metodo" class="form-control">
-                                    <option value="lagrange">Lagrange</option>
-                                    <option value="newton">Newton</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="di_orden">Orden de derivada:</label>
-                                <select id="di_orden" class="form-control">
-                                    <option value="1">Primera derivada</option>
-                                    <option value="2">Segunda derivada</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="di_puntos">Número de puntos:</label>
-                            <select id="di_puntos" class="form-control">
-                                <option value="5">5 puntos</option>
-                                <option value="7">7 puntos</option>
-                                <option value="9">9 puntos</option>
-                            </select>
-                        </div>
-                        
-                        <button type="submit" class="btn">Calcular Derivada por Interpolación</button>
-                    </form>
-                </div>
-                
-                <div id="derivadaInterpolacionResults" class="results" style="display: none;"></div>
-            </div>
+            
         </div>
     </div>
 
@@ -1446,44 +1274,12 @@
             }
         });
         
-        document.getElementById('derivadaInterpolacionForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const data = {
-                funcion: document.getElementById('di_funcion').value,
-                x: document.getElementById('di_x').value,
-                h: document.getElementById('di_h').value,
-                metodo: document.getElementById('di_metodo').value,
-                orden: document.getElementById('di_orden').value,
-                num_puntos: document.getElementById('di_puntos').value
-            };
-            
-            showLoading('derivadaInterpolacionResults');
-            
-            try {
-                const response = await fetch('/derivada_interpolacion', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
-                
-                const result = await response.json();
-                showResults('derivadaInterpolacionResults', result);
-            } catch (error) {
-                showResults('derivadaInterpolacionResults', {
-                    success: false,
-                    error: 'Error de conexión: ' + error.message
-                });
-            }
-        });
+        // Derivada por Interpolación removed from UI; related event listener omitted.
         
         // Inicializar preview matemático al cargar la página
         window.addEventListener('DOMContentLoaded', function() {
             updateMathPreview('df_funcion', 'math-preview');
             updateMathPreview('r_funcion', 'r_math-preview');
-            updateMathPreview('di_funcion', 'di_math-preview');
         });
     </script>
 </body>

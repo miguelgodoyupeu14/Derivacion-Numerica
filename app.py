@@ -158,10 +158,16 @@ def richardson_extrapolacion(f_expr, x_val, h_inicial=1e-2, metodo='centrada', o
         
         # Extrapolación de Richardson
         pasos.append(f"\n<b>Tabla de extrapolación:</b>")
+        # Determinar el exponente p del término de error ~ h^p según método y orden
+        if orden == 1:
+            p = 2 if metodo == 'centrada' else 1
+        else:  # orden == 2
+            p = 2 if metodo == 'centrada' else 1
+
         for j in range(1, niveles):
             for i in range(niveles - j):
-                # Factor 4 para orden 2, factor 2^(2*j) para orden general
-                factor = 4**j if orden == 1 else (2**(orden*j + j))
+                # Factor = 2^(p * j)
+                factor = 2 ** (p * j)
                 R[i, j] = (factor * R[i+1, j-1] - R[i, j-1]) / (factor - 1)
                 pasos.append(f"R[{i},{j}] = ({factor} * R[{i+1},{j-1}] - R[{i},{j-1}]) / {factor-1} = {R[i, j]:.8f}")
         
