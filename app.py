@@ -342,55 +342,107 @@ def derivada_por_interpolacion(f_expr, x_val, h=1e-3, num_puntos=5, metodo='lagr
         if num_puntos % 2 == 0:
             num_puntos += 1
         
-        # Generar puntos centrados
+        # Generar puntos centrados alrededor de x_val
         inicio = -(num_puntos // 2)
         fin = num_puntos // 2 + 1
         x_puntos = [x_val + i * h for i in range(inicio, fin)]
         y_puntos = [f(xi) for xi in x_puntos]
         
         pasos = []
-        pasos.append(f"<b>Derivada por interpolación {metodo.title()}</b>")
-        pasos.append(f"Puntos utilizados: {list(zip(x_puntos, y_puntos))}")
+        pasos.append(f"<b>Derivada por Interpolación {metodo.title()}</b>")
+        pasos.append(f"Función: f(x) = {f_expr}")
+        pasos.append(f"Punto de evaluación: x = {x_val}")
+        pasos.append(f"Espaciado: h = {h}")
+        pasos.append(f"Puntos generados automáticamente:")
         
-        # Obtener polinomio
+        for i, (xi, yi) in enumerate(zip(x_puntos, y_puntos)):
+            pasos.append(f"  ({xi:.6f}, {yi:.6f})")
+        
+        # Aplicar método de interpolación seleccionado
         if metodo == 'lagrange':
-            polinomio, pasos_poli = lagrange_polinomio(x_puntos, y_puntos)
+            pasos.append(f"\n<b>Aplicando método de Lagrange:</b>")
+            # Construir polinomio de Lagrange simbólicamente
+            polinomio = 0
+            for i in range(len(x_puntos)):
+                Li = 1
+                Li_str = f"L_{i}(x) = "
+                for j in range(len(x_puntos)):
+                    if i != j:
+                        Li *= (x - x_puntos[j]) / (x_puntos[i] - x_puntos[j])
+                        Li_str += f"(x - {x_puntos[j]:.3f})/({x_puntos[i] - x_puntos[j]:.3f}) * "
+                
+                polinomio += y_puntos[i] * Li
+                pasos.append(f"{Li_str[:-3]} -> Coef: {y_puntos[i]:.6f}")
+            
+            polinomio = simplify(expand(polinomio))
+            
         else:  # newton
-            # Para Newton necesitamos construir el polinomio simbólicamente
-            coef_newton = []
+            pasos.append(f"\n<b>Aplicando método de Newton:</b>")
+            # Calcular tabla de diferencias divididas
             dd = [y_puntos[:]]
+            pasos.append(f"Tabla de diferencias divididas:")
+            pasos.append(f"Orden 0: {[f'{y:.6f}' for y in y_puntos]}")
+            
             for j in range(1, len(x_puntos)):
                 col = []
                 for i in range(len(x_puntos)-j):
                     val = (dd[j-1][i+1] - dd[j-1][i]) / (x_puntos[i+j] - x_puntos[i])
                     col.append(val)
                 dd.append(col)
+                pasos.append(f"Orden {j}: {[f'{val:.6f}' for val in col]}")
             
-            polinomio = dd[0][0]
+            # Construir polinomio de Newton
+            pasos.append(f"\nCoeficientes de Newton: {[f'{dd[j][0]:.6f}' for j in range(len(x_puntos))]}")
+            
+            polinomio = dd[0][0]  # Término constante
             mult = 1
+            pasos.append(f"P(x) = {dd[0][0]:.6f}")
+            
             for i in range(1, len(x_puntos)):
                 mult *= (x - x_puntos[i-1])
-                polinomio += dd[i][0] * mult
+                termino = dd[i][0] * mult
+                polinomio += termino
+                pasos.append(f"     + {dd[i][0]:.6f} * (x - {x_puntos[i-1]:.3f})...")
             
             polinomio = simplify(expand(polinomio))
         
-        # Derivar el polinomio
+        pasos.append(f"\n<b>Polinomio interpolador:</b>")
+        pasos.append(f"P(x) = {polinomio}")
+        
+        # Derivar el polinomio analíticamente
+        pasos.append(f"\n<b>Derivación analítica:</b>")
         derivada_poly = diff(polinomio, x, orden)
+        pasos.append(f"P^({orden})(x) = {derivada_poly}")
+        
+        # Evaluar la derivada en x_val
         resultado = float(derivada_poly.subs(x, x_val))
+        pasos.append(f"\n<b>Evaluación en x = {x_val}:</b>")
+        pasos.append(f"P^({orden})({x_val}) = {resultado:.10f}")
         
-        pasos.append(f"Polinomio: {polinomio}")
-        pasos.append(f"Derivada de orden {orden}: {derivada_poly}")
-        pasos.append(f"Evaluado en x={x_val}: {resultado:.8f}")
-        
-        # Comparar con derivada exacta
+        # Comparar con derivada exacta si es posible
         try:
             derivada_exacta_expr = diff(expr, x, orden)
             derivada_exacta = float(derivada_exacta_expr.subs(x, x_val))
             error = abs(resultado - derivada_exacta)
-            pasos.append(f"\nDerivada exacta: {derivada_exacta:.8f}")
-            pasos.append(f"Error: {error:.2e}")
+            mejora_factor = "N/A"
+            
+            pasos.append(f"\n<b>Verificación con derivada exacta:</b>")
+            pasos.append(f"Derivada exacta: {derivada_exacta:.10f}")
+            pasos.append(f"Error absoluto: {error:.2e}")
+            
+            # Comparar con diferencia finita centrada simple
+            try:
+                df_simple = (f(x_val + h) - f(x_val - h)) / (2 * h) if orden == 1 else (f(x_val + h) - 2*f(x_val) + f(x_val - h)) / (h**2)
+                error_df = abs(df_simple - derivada_exacta)
+                if error_df > 0:
+                    mejora_factor = f"{error_df/error:.1f}x"
+                pasos.append(f"Error diferencia finita simple: {error_df:.2e}")
+                pasos.append(f"Mejora de precisión: {mejora_factor}")
+            except:
+                pass
+                
         except:
-            pass
+            pasos.append(f"\nNo se pudo calcular la derivada exacta para comparación")
         
         return resultado, pasos
         
@@ -504,6 +556,12 @@ def calcular_derivada_interpolacion():
             'success': False,
             'error': str(e)
         })
+
+@app.route('/solve', methods=['POST'])
+def solve():
+    function = request.form.get('function')
+    # ...existing code to process the function...
+    return "Resultado procesado"  # Replace with actual result rendering
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)
